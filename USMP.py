@@ -1,6 +1,9 @@
-import os
-from mitmproxy import http, ctx
+import os, CurrOS
+from mitmproxy import http, ctx, options, master
 from re import sub
+import mitmproxy
+from mitmproxy.tools.main import mitmdump
+import sys
 
 last_modified_time = None
 file_dir = os.path.dirname(os.path.abspath(__file__))
@@ -47,4 +50,11 @@ def response(flow):
 
 
 check_directory_changes()
-addons = [response]
+CurrOS.setProxy("127.0.0.1", "8080")
+
+
+def done():
+    CurrOS.clearProxy()
+
+
+addons = [response, done]
