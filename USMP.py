@@ -28,22 +28,22 @@ def load_scripts():
 
 def check_directory_changes():
     global last_modified_time
-    # 获取目录元数据
-    stat_info = os.stat(file_dir)
+    # only works when file renamed or deleted or created
+    # not works when only file modified
     # 获取目录的最后修改时间
-    current_modified_time = stat_info.st_mtime
+    current_modified_time = os.path.getmtime(file_dir)
     # 比较目录的最后修改时间和上一次记录的时间戳
     if last_modified_time is None or current_modified_time > last_modified_time:
         # 目录有更改，重新加载
         load_scripts()
-    # 更新上一次记录的时间戳
-    last_modified_time = current_modified_time
+        # 更新上一次记录的时间戳
+        last_modified_time = current_modified_time
 
 
 def response(flow):
-    check_directory_changes()
     # 检查响应的Content-Type是否为text/html
     if flow.response.headers.get("content-type", "").startswith("text/html"):
+        check_directory_changes()
         flow.response.set_text(
             sub(
                 r"</head>",
