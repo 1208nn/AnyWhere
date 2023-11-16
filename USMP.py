@@ -10,7 +10,6 @@ file_dir = os.path.dirname(os.path.abspath(__file__))
 
 
 def load_scripts():
-    global scripts
     global formatted_scripts
     scripts = [
         filename for filename in os.listdir(file_dir) if filename.endswith(".user.js")
@@ -19,6 +18,12 @@ def load_scripts():
     for script in scripts:
         with open(script, "r", encoding="utf-8") as f:
             formatted_scripts += f"<script>{f.read()}</script>"
+    htmls = [
+        filename for filename in os.listdir(file_dir) if filename.endswith(".html")
+    ]
+    for html in htmls:
+        with open(html, "r", encoding="utf-8") as f:
+            formatted_scripts += f.read()
 
 
 def check_directory_changes():
