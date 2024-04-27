@@ -1,0 +1,3 @@
+[submodule "CurrOS"]
+	path = CurrOS
+	url = https://github.com/1208nn/CurrOS.git
