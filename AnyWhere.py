@@ -37,8 +37,25 @@ def response(flow):
 
 
 def done():
-    CurrOS.clearProxy()
+    try:
+        CurrOS.clearProxy()
+    except:
+        pass
 
 
 addons = [response, done]
-CurrOS.setProxy("127.0.0.1", "8080")
+try:
+    CurrOS.setProxy("127.0.0.1", "8080")
+except:
+    pass
+
+
+from mitmproxy import http
+from mitmproxy.options import Options
+from mitmproxy.tools.main import mitmproxy
+
+
+options = Options(listen_port=8080)
+
+if __name__ == "__main__":
+    mitmproxy(options, addons=addons)
