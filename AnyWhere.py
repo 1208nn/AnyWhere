@@ -12,8 +12,10 @@ except AttributeError:
 if __name__ == "__main__":
     from mitmproxy.tools.main import mitmdump
 
-    mitmdump(args=["-s", "addon.py"])
-
+    mitmdump(
+        args=["-s", "addon.py", "--listen-port", "8080", "--listen-host", "127.0.0.1"]
+    )
+input()
 with ThreadedMitmProxy(addon, listen_port=8080, listen_host="127.0.0.1"):
     input()
 
