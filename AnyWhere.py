@@ -1,44 +1,22 @@
-import os, CurrOS
-from re import sub
+# pylint: disable=missing-module-docstring,missing-function-docstring,missing-class-docstring
+# pylint: disable=invalid-name
+from addon import addon
+import CurrOS
+from backend import ThreadedMitmProxy
 
+try:
+    CurrOS.setProxy("127.0.0.1", "8080")
+except AttributeError:
+    pass
 
-file_dir = os.path.dirname(os.path.abspath(__file__))
-formatted_scripts = ""
+if __name__ == "__main__":
+    from mitmproxy.tools.main import mitmdump
 
+    mitmdump(
+        args=["-s", "addon.py", "--listen-port", "8080", "--listen-host", "127.0.0.1"]
+    )
+input()
+with ThreadedMitmProxy(addon, listen_port=8080, listen_host="127.0.0.1"):
+    input()
 
-def load_scripts():
-    global formatted_scripts
-    scripts = [
-        filename for filename in os.listdir(file_dir) if filename.endswith(".user.js")
-    ]
-    formatted_scripts = ""
-    for script in scripts:
-        with open(script, "r", encoding="utf-8") as f:
-            formatted_scripts += f"<script>{f.read()}</script>"
-    htmls = [
-        filename for filename in os.listdir(file_dir) if filename.endswith(".html")
-    ]
-    for html in htmls:
-        with open(html, "r", encoding="utf-8") as f:
-            formatted_scripts += f.read()
-
-
-def response(flow):
-    if flow.response.headers.get("content-type", "").startswith("text/html"):
-        load_scripts()
-        flow.response.set_text(
-            sub(
-                r"</head>",
-                f"{formatted_scripts}</head>",
-                flow.response.get_text(),
-                count=1,
-            )
-        )
-
-
-def done():
-    CurrOS.clearProxy()
-
-
-addons = [response, done]
-CurrOS.setProxy("127.0.0.1", "8080")
+CurrOS.clearProxy()
