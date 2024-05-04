@@ -3,10 +3,14 @@
 import asyncio
 import threading
 from typing import Any, Callable, Self
+import shutil
+import os
 
 from mitmproxy.addons import default_addons, script
 from mitmproxy.master import Master
 from mitmproxy.options import Options
+
+import CurrOS
 
 
 class ThreadedMitmProxy(threading.Thread):
@@ -34,3 +38,10 @@ class ThreadedMitmProxy(threading.Thread):
     def __exit__(self, *_) -> None:
         self.master.shutdown()
         self.join()
+
+
+def clean_temp():
+    try:
+        shutil.rmtree(os.path.join(os.environ['TEMP'], "AnyWhere"))
+    except FileNotFoundError:
+        pass
