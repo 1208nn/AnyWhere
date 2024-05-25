@@ -81,14 +81,12 @@ class addon:
                 ).start()
         # MARK: Script Installing
         elif flow.request.url.endswith(".user.js"):
+            script_file_name = unquote(flow.request.url.split("/")[-1].split("?")[0])
             script_name = (
                 flow.response.get_text().split("@name")[1].split("\n")[0].strip()
+                if "@name" in flow.response.get_text()
+                else script_file_name
             )
-            script_file_name = unquote(flow.request.url.split("/")[-1].split("?")[0])
-            if not all(ord(c) < 128 for c in script_name):
-                script_name = script_file_name
-            if not all(ord(c) < 128 for c in script_file_name):
-                script_file_name = str(hash(script_name)) + ".user.js"
             os.makedirs(os.path.join(os.environ["TEMP"], "anywhere"), exist_ok=True)
             with open(
                 os.path.join(os.environ["TEMP"], "anywhere", script_file_name),
@@ -99,7 +97,12 @@ class addon:
             if os.name == "nt":  # A really good experience for Windows
                 subprocess.Popen(
                     [
-                        r".\bin\win\toast64.exe",
+                        "powershell",
+                        "-ep",
+                        "Bypass",
+                        "-File",
+                        "win/toast.ps1",
+                        r'''# TODO: change method for push toast,not finished this is old one
                         "--app-id",
                         "Anywhere",
                         "--title",
@@ -129,6 +132,7 @@ class addon:
                         "Ignore",
                         "--action-arg",
                         "anywhere:decline/{script}".format(script=script_file_name),
+                        '''
                     ]
                 )
             else:
