@@ -10,8 +10,6 @@ from mitmproxy.addons import default_addons, script
 from mitmproxy.master import Master
 from mitmproxy.options import Options
 
-import CurrOS
-
 
 class ThreadedMitmProxy(threading.Thread):
     def __init__(self, user_addon: Callable, **options: Any) -> None:
