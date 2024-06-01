@@ -55,6 +55,10 @@ class addon:
                     bytes(self._load_scripts(flow.request.query), encoding="utf-8"),
                     {"Content-Type": "text/javascript"},
                 )
+        elif flow.request.url.endswith(".user.js"):
+            flow.request.headers["Cache-Control"] = "no-cache"
+            flow.request.headers["Pragma"] = "no-cache"
+            flow.request.headers["If-Modified-Since"] = "0"
 
     # MARK: Response
     def response(self, flow: http.HTTPFlow):
@@ -81,7 +85,7 @@ class addon:
                 ).start()
         # MARK: Script Installing
         elif flow.request.url.endswith(".user.js"):
-            script_file_name = unquote(flow.request.url.split("/")[-1].split("?")[0])
+            script_file_name = unquote(flow.request.url.split("/")[-1])
             script_name = (
                 flow.response.get_text().split("@name")[1].split("\n")[0].strip()
                 if "@name" in flow.response.get_text()
