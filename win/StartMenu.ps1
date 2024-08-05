@@ -1,7 +1,7 @@
 param (
     [string]$awpath
 )
-$targetFilePath = "$awpath\dist\protocol.exe"
+$targetFilePath = "$awpath\dist\launcher.exe"
 $arguments = ""
 $shortcutName = "AnyWhere"
 $shortcutDescription = "The universal userscript manager"

@@ -1,26 +1,27 @@
 ﻿param (
   [string]$awpath,
-  [string]$scriptname
+  [string]$scriptname,
+  [string]$scriptfilename
 )
 $xml = @"
 <toast>
   <visual>
     <binding template="ToastGeneric">
       <text>New Userscript Detected</text>
-      <text>Click to check $scriptname.`nYou can also`ninstall👇 it directly, or 👇ignore it.</text>
+      <text>Click to check $scriptname.`nYou can also`ninstall👇 it directly, or 👇dismiss it.`nRight click for mute.</text>
       <image placement='appLogoOverride' src='$awpath\assets\A.png'/>
     </binding>
   </visual>
   <actions>
-    <action activationType='protocol' content='✔ Install' arguments='anywhere:install/'/>
-    <action activationType='protocol' content='❌ Ignore' arguments='anyhwere:decline/'/>
+    <action activationType='protocol' content='✔ Install' arguments='anywhere:install/$scriptfilename'/>
+    <action activationType='protocol' content='❌ Dismiss' arguments='anyhwere:dismiss/$scriptfilename'/>
   </actions>
 </toast>
 "@
 $XmlDocument = [Windows.Data.Xml.Dom.XmlDocument, Windows.Data.Xml.Dom.XmlDocument, ContentType = WindowsRuntime]::New()
 $XmlDocument.loadXml($xml)
 
-$AppId = "$awpath\dist\protocol.exe"
+$AppId = "$awpath\dist\launcher.exe"
 
 [Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notifications, ContentType = WindowsRuntime] > $null
 $Toast = [Windows.UI.Notifications.ToastNotification]::new($XmlDocument)

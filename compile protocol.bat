@@ -1,1 +1,0 @@
-pyinstaller -F protocol.pyw

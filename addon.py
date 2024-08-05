@@ -2,9 +2,9 @@
 # pylint: disable=invalid-name,consider-using-f-string,line-too-long
 import re
 import os
-from urllib.parse import unquote
 import threading
 import subprocess
+from urllib import parse
 from mitmproxy import http
 import CurrOS
 
@@ -26,11 +26,12 @@ class addon:
         ]
         formatted_scripts = ""
         for script in scripts:
-            with open(script, "r", encoding="utf-8") as f:
-                if "@match" not in f.read():
-                    formatted_scripts += f.read()
+            with open(os.path.join(self.data_path,script), "r", encoding="utf-8") as f:
+                fcontent=f.read()
+                if "@match" not in fcontent:
+                    formatted_scripts += "<script>" + fcontent + "</script>"
                 else:
-                    for i in f.readline():
+                    for i in fcontent.splitlines():
                         if i == "// ==/UserScript==":
                             break
                         if "@match" in i:
@@ -42,17 +43,20 @@ class addon:
                                 ),
                                 url,
                             ):
-                                formatted_scripts += f.read()
+                                formatted_scripts += "<script>" + fcontent + "</script>"
                                 break
         return formatted_scripts
 
     # MARK: Script Generating
     def request(self, flow: http.HTTPFlow):
         if flow.request.host == "any.where":
-            if flow.request.path == "/getuserscript":
+            if flow.request.path_components[-1] == "userscript":
                 flow.response = http.Response.make(
                     200,
-                    bytes(self._load_scripts(flow.request.query), encoding="utf-8"),
+                    bytes(
+                        self._load_scripts(parse.unquote(flow.request.query)),
+                        encoding="utf-8",
+                    ),
                     {"Content-Type": "text/javascript"},
                 )
         elif flow.request.url.endswith(".user.js"):
@@ -72,8 +76,12 @@ class addon:
                 self.iframe_src.remove(flow.request.url)
             else:
                 flow.response.set_text(
-                    f'<script src="http://any.where/getuserscript?{flow.request.url}"></script>'
-                    + flow.response.get_text()
+                    re.sub(
+                        r"</head>",
+                        f"{self._load_scripts(flow.request.url)}</head>",
+                        flow.response.get_text(),
+                        count=1,
+                    )
                 )
             self.iframe_src += iframe_src
             for i in iframe_src:
@@ -85,7 +93,7 @@ class addon:
                 ).start()
         # MARK: Script Installing
         elif flow.request.url.endswith(".user.js"):
-            script_file_name = unquote(flow.request.url.split("/")[-1])
+            script_file_name = flow.request.path_components[-1]
             script_name = (
                 flow.response.get_text().split("@name")[1].split("\n")[0].strip()
                 if "@name" in flow.response.get_text()
@@ -98,7 +106,8 @@ class addon:
                 encoding="utf-8",
             ) as f:
                 f.write(flow.response.get_text())
-            if os.name == "nt":  # A really good experience for Windows
+            if os.name == "nt":
+                # TODO: script logo
                 subprocess.Popen(
                     [
                         "powershell",
@@ -106,37 +115,9 @@ class addon:
                         "Bypass",
                         "-File",
                         "win/toast.ps1",
-                        r'''# TODO: change method for push toast,not finished this is old one
-                        "--app-id",
-                        "Anywhere",
-                        "--title",
-                        "New Userscript Detected",
-                        "--message",
-                        "Click to check{script}. You can also install it directly, or ignore it.".format(
-                            script=(
-                                (" " + script_name)
-                                if all(ord(c) < 128 for c in script_name)
-                                else ""
-                            )
-                        ),
-                        "--icon",
-                        os.path.join(os.getcwd(), "A.png"),
-                        "--audio",
-                        "default",
-                        "--loop",
-                        "--duration",
-                        "long",
-                        "--activation-arg",
-                        "anywhere:check/{script}".format(script=script_file_name),
-                        "--action",
-                        "Install",
-                        "--action-arg",
-                        "anywhere:install/{script}".format(script=script_file_name),
-                        "--action",
-                        "Ignore",
-                        "--action-arg",
-                        "anywhere:decline/{script}".format(script=script_file_name),
-                        '''
+                        os.getcwd(),
+                        script_name,
+                        script_file_name,
                     ]
                 )
             else:
