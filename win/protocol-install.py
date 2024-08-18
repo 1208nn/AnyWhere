@@ -14,4 +14,4 @@ with winreg.ConnectRegistry(None, winreg.HKEY_CURRENT_USER) as root:
         root, r"Software\Classes\anywhere\shell\open\command", 0, winreg.KEY_WRITE
     ) as key:
         winreg.SetValueEx(key, "", 0, winreg.REG_SZ,
-            f'"{__file__.replace('protocol-install-win.py',r'dist\protocol.exe')}" "%1"')
+            f'"{__file__.replace('protocol-install-win.py',r'dist\AnyWhere.exe')}" "%1"')

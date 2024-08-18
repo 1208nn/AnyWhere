@@ -3,6 +3,22 @@
   [string]$scriptname,
   [string]$scriptfilename
 )
+
+$targetFilePath = "$awpath\dist\AnyWhere.exe"
+$arguments = ""
+$shortcutName = "AnyWhere"
+$shortcutDescription = "The universal userscript manager"
+$iconPath = "$awpath\assets\A.ico"
+$shortcutPath = "$env:APPDATA\Microsoft\Windows\Start Menu\Programs\$shortcutName.lnk"
+
+$WScriptShell = New-Object -ComObject WScript.Shell
+$shortcut = $WScriptShell.CreateShortcut($shortcutPath)
+$shortcut.TargetPath = $targetFilePath
+$shortcut.Arguments = $arguments
+$shortcut.Description = $shortcutDescription
+$shortcut.IconLocation = $iconPath
+$shortcut.Save()
+
 $xml = @"
 <toast>
   <visual>
@@ -21,7 +37,7 @@ $xml = @"
 $XmlDocument = [Windows.Data.Xml.Dom.XmlDocument, Windows.Data.Xml.Dom.XmlDocument, ContentType = WindowsRuntime]::New()
 $XmlDocument.loadXml($xml)
 
-$AppId = "$awpath\dist\launcher.exe"
+$AppId = "$awpath\dist\AnyWhere.exe"
 
 [Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notifications, ContentType = WindowsRuntime] > $null
 $Toast = [Windows.UI.Notifications.ToastNotification]::new($XmlDocument)
