@@ -30,6 +30,7 @@ else:
     # MARK: Start App
     # For packed
     # Only support proxy auto set on Windows now
+    # It's better to be packed without console
     if getattr(sys, "frozen", False):
         os.chdir(os.path.dirname(sys.executable))
         with ThreadedMitmProxy(addon, listen_port=8080, listen_host="127.0.0.1"):
