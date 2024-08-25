@@ -33,9 +33,9 @@ else:
     # It's better to be packed without console
     if getattr(sys, "frozen", False):
         os.chdir(os.path.dirname(sys.executable))
-        with ThreadedMitmProxy(addon, listen_port=8080, listen_host="127.0.0.1"):
+        with ThreadedMitmProxy(addon, listen_port=8909, listen_host="127.0.0.1"):
             try:
-                CurrOS.setProxy("127.0.0.1", "8080")
+                CurrOS.setProxy("127.0.0.1", "8909")
             except AttributeError:
                 pass
 
@@ -61,7 +61,7 @@ else:
                 "-s",
                 "addon.py",
                 "--listen-port",
-                "8080",
+                "8909",
                 "--listen-host",
                 "127.0.0.1",
             ]
