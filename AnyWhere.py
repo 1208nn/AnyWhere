@@ -24,47 +24,47 @@ if len(sys.argv) > 1:
         os.remove(os.path.join(os.environ["TEMP"], "anywhere", arg))
     elif operation_type == "mute":
         pass  # TODO:mute
+    sys.exit(0)
 
+clean_temp()
+# MARK: Start App
+# For packed
+# Only support proxy auto set on Windows now
+# It's better to be packed without console
+if getattr(sys, "frozen", False):
+    os.chdir(os.path.dirname(sys.executable))
+    with ThreadedMitmProxy(addon, listen_port=8909, listen_host="127.0.0.1"):
+        try:
+            CurrOS.setProxy("127.0.0.1", "8909")
+        except AttributeError:
+            pass
+
+        def close(icon, _):
+            icon.stop()
+
+        pystray.Icon(
+            "AnyWhere",
+            Image.open("D:\\Profile\\Documents\\Codes\\AnyWhere\\assets\\A.png"),
+            "AnyWhere",
+            [MenuItem("Exit", close)],
+        ).run()
+
+        CurrOS.clearProxy()
+# MARK: Debug Mode
+# When not packed, no proxy auto set support
 else:
-    clean_temp()
-    # MARK: Start App
-    # For packed
-    # Only support proxy auto set on Windows now
-    # It's better to be packed without console
-    if getattr(sys, "frozen", False):
-        os.chdir(os.path.dirname(sys.executable))
-        with ThreadedMitmProxy(addon, listen_port=8909, listen_host="127.0.0.1"):
-            try:
-                CurrOS.setProxy("127.0.0.1", "8909")
-            except AttributeError:
-                pass
+    os.chdir(os.path.dirname(__file__))
+    from mitmproxy.tools.main import mitmdump
 
-            def close(icon, _):
-                icon.stop()
+    mitmdump(
+        args=[
+            "-s",
+            "addon.py",
+            "--listen-port",
+            "8909",
+            "--listen-host",
+            "127.0.0.1",
+        ]
+    )
 
-            pystray.Icon(
-                "AnyWhere",
-                Image.open("D:\\Profile\\Documents\\Codes\\AnyWhere\\assets\\A.png"),
-                "AnyWhere",
-                [MenuItem("Exit", close)],
-            ).run()
-
-            CurrOS.clearProxy()
-    # MARK: Debug Mode
-    # When not packed, no proxy auto set support
-    else:
-        os.chdir(os.path.dirname(__file__))
-        from mitmproxy.tools.main import mitmdump
-
-        mitmdump(
-            args=[
-                "-s",
-                "addon.py",
-                "--listen-port",
-                "8909",
-                "--listen-host",
-                "127.0.0.1",
-            ]
-        )
-
-    clean_temp()
+clean_temp()
